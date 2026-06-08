@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useFocusEffect } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
 import { getRideSessions } from '../../lib/storage';
 import { RideSession } from '../../types/ride';
 
@@ -29,9 +29,9 @@ function formatDistance(metres: number): string {
   return `${Math.round(metres)} m`;
 }
 
-function RideRow({ ride }: { ride: RideSession }) {
+function RideRow({ ride, onPress }: { ride: RideSession; onPress: () => void }) {
   return (
-    <TouchableOpacity style={styles.row} activeOpacity={0.7}>
+    <TouchableOpacity style={styles.row} activeOpacity={0.7} onPress={onPress}>
       <View style={styles.rowLeft}>
         <Text style={styles.rowDate}>{formatDate(ride.started_at)}</Text>
         <Text style={styles.rowTime}>{formatTime(ride.started_at)}</Text>
@@ -51,6 +51,7 @@ function RideRow({ ride }: { ride: RideSession }) {
 
 export default function HistoryScreen() {
   const [rides, setRides] = useState<RideSession[]>([]);
+  const router = useRouter();
 
   useFocusEffect(() => {
     setRides(getRideSessions());
@@ -69,7 +70,9 @@ export default function HistoryScreen() {
         <FlatList
           data={rides}
           keyExtractor={(r) => r.id}
-          renderItem={({ item }) => <RideRow ride={item} />}
+          renderItem={({ item }) => (
+            <RideRow ride={item} onPress={() => router.push(`/ride/${item.id}`)} />
+          )}
           contentContainerStyle={styles.list}
           ItemSeparatorComponent={() => <View style={styles.separator} />}
         />

@@ -20,6 +20,7 @@ import {
   kvGet,
   kvSet,
 } from '../../lib/storage';
+import { scoreRide, updateRollingBaseline } from '../../lib/analytics';
 import { getCalibration } from '../../lib/calibration';
 import { RideSession } from '../../types/ride';
 
@@ -230,6 +231,9 @@ export default function RecordScreen() {
     }
     const duration = Math.round((ended_at - start) / 1000);
     finalizeRideSession(sid, ended_at, distance, duration);
+
+    const scores = scoreRide(sid);
+    updateRollingBaseline(scores);
 
     await Notifications.dismissAllNotificationsAsync();
 
