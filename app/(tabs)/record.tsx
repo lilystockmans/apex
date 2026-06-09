@@ -16,11 +16,15 @@ import {
   discardSession,
   recoverSession,
   getRidePoints,
+  getRideSessions,
   getIncompleteSession,
   kvGet,
   kvSet,
 } from '../../lib/storage';
 import { scoreRide, updateRollingBaseline } from '../../lib/analytics';
+import { getCurrentLevel } from '../../lib/curriculum';
+import { assignDrill } from '../../lib/insights';
+import { requestNotificationPermission, scheduleWeeklyScoreNotification, sendLevelUpNotification } from '../../lib/notifications';
 import { getCalibration } from '../../lib/calibration';
 import { RideSession } from '../../types/ride';
 
@@ -234,6 +238,22 @@ export default function RecordScreen() {
 
     const scores = scoreRide(sid);
     updateRollingBaseline(scores);
+
+    // Level-up check: fire notification and assign new drill if level changed
+    const levelBefore = kvGet('last_known_level');
+    const newLevel = getCurrentLevel();
+    if (levelBefore && levelBefore !== newLevel.id) {
+      sendLevelUpNotification(newLevel.label);
+      assignDrill();
+    }
+    kvSet('last_known_level', newLevel.id);
+
+    // Request notification permission and schedule weekly score after 3rd ride
+    const sessions = getRideSessions();
+    if (sessions.length === 3) {
+      await requestNotificationPermission();
+      await scheduleWeeklyScoreNotification();
+    }
 
     await Notifications.dismissAllNotificationsAsync();
 
