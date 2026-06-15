@@ -2,7 +2,7 @@ const base = require('./app.json');
 module.exports = {
   ...base.expo,
   extra: {
-    // Add API keys here in future phases, e.g.:
-    // supabaseUrl: process.env.SUPABASE_URL ?? '',
+    supabaseUrl: process.env.SUPABASE_URL ?? '',
+    supabaseAnonKey: process.env.SUPABASE_ANON_KEY ?? '',
   },
 };

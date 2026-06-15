@@ -118,5 +118,9 @@ export function getLastRidePoints(session_id: string, count: number): RidePoint[
   );
 }
 
+export function kvDelete(key: string) {
+  db.runSync('DELETE FROM kv_store WHERE key = ?', [key]);
+}
+
 // Tables are created at module load so kvGet is always safe to call before initDb()
 initDb();
